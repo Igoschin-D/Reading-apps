@@ -17,8 +17,10 @@ from core.reader import BookReader
 from core.storage import load_book
 
 DEFAULT_FONT_SIZE = 16
-BASE_CHARS_PER_LINE = 40
-BASE_LINES_PER_PAGE = 20
+# запасной размер страницы, если экран ещё не получил реальные размеры
+# от Kivy (не должно происходить на практике — окно уже отрисовано к
+# моменту, когда пользователь успевает открыть книгу)
+FALLBACK_PAGE_SIZE = (360, 640)
 
 
 class ReaderScreen(MDScreen):
@@ -66,16 +68,16 @@ class ReaderScreen(MDScreen):
 
     def load_book(self, ubook_path: Path):
         book = load_book(ubook_path)
-        chars_per_line, lines_per_page = self._reflow_params()
-        self.reader = BookReader(book, chars_per_line=chars_per_line, lines_per_page=lines_per_page)
+        page_width, page_height = self._page_size()
+        self.reader = BookReader(book, page_width, page_height, self.font_size)
         self.toolbar.title = book.metadata.title
         self._render_current_page()
 
-    def _reflow_params(self):
-        scale = DEFAULT_FONT_SIZE / self.font_size
-        chars_per_line = max(int(BASE_CHARS_PER_LINE * scale), 10)
-        lines_per_page = max(int(BASE_LINES_PER_PAGE * scale), 5)
-        return chars_per_line, lines_per_page
+    def _page_size(self):
+        width, height = self.page_label.size
+        if width <= 0 or height <= 0:
+            return FALLBACK_PAGE_SIZE
+        return width, height
 
     def _render_current_page(self):
         if not self.reader:
@@ -121,7 +123,7 @@ class ReaderScreen(MDScreen):
             return
         current_chapter = self.reader.current_page().chapter_index
         self.font_size = font_size
-        chars_per_line, lines_per_page = self._reflow_params()
-        self.reader = BookReader(self.reader.book, chars_per_line=chars_per_line, lines_per_page=lines_per_page)
+        page_width, page_height = self._page_size()
+        self.reader = BookReader(self.reader.book, page_width, page_height, self.font_size)
         self.reader.go_to_chapter(current_chapter)
         self._render_current_page()

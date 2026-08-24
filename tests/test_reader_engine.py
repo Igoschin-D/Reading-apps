@@ -25,8 +25,8 @@ def print_page(page, index, total) -> None:
 def main() -> None:
     book = load_book(UBOOK_PATH)
 
-    # эмулируем маленький экран телефона: ~32 символа в строке, 18 строк на странице
-    reader = BookReader(book, chars_per_line=32, lines_per_page=18)
+    # эмулируем маленький экран телефона: 360x640px, шрифт 16sp
+    reader = BookReader(book, page_width=360, page_height=640, font_size=16)
     print(f"Всего страниц: {reader.total_pages()}")
     print(f"Оглавление: {reader.table_of_contents()}")
 

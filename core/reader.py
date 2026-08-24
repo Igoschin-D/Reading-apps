@@ -11,11 +11,16 @@ from core.paginator import Page, paginate
 
 
 class BookReader:
-    def __init__(self, book: Book, chars_per_line: int = 40, lines_per_page: int = 20):
+    def __init__(
+        self,
+        book: Book,
+        page_width: float,
+        page_height: float,
+        font_size: float,
+        font_name: str | None = None,
+    ):
         self.book = book
-        self.chars_per_line = chars_per_line
-        self.lines_per_page = lines_per_page
-        self.pages: list[Page] = paginate(book, chars_per_line, lines_per_page)
+        self.pages: list[Page] = paginate(book, page_width, page_height, font_size, font_name)
         self.current_index = 0
 
     def total_pages(self) -> int:
